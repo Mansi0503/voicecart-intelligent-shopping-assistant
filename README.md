@@ -1,4 +1,4 @@
-# voicecart-intelligent-shopping-assistant
+# Voicecart-intelligent-shopping-assistant
 AI-powered voice shopping assistant with natural-language commands, smart recommendations, budget tracking, product matching, and shopping insights.
 # 🛒 VoiceCart – Intelligent Voice Shopping Assistant
 
