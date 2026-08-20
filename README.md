@@ -1,565 +1,170 @@
-# Voicecart-intelligent-shopping-assistant
-AI-powered voice shopping assistant with natural-language commands, smart recommendations, budget tracking, product matching, and shopping insights.
-# 🛒 VoiceCart – Intelligent Voice Shopping Assistant
+# type-is
 
-> A voice-first intelligent shopping assistant that understands natural-language commands, manages shopping lists, provides contextual recommendations, tracks budgets, and generates useful shopping insights.
+[![NPM Version][npm-version-image]][npm-url]
+[![NPM Downloads][npm-downloads-image]][npm-url]
+[![Node.js Version][node-version-image]][node-version-url]
+[![Build Status][travis-image]][travis-url]
+[![Test Coverage][coveralls-image]][coveralls-url]
 
-## 🚀 Overview
+Infer the content-type of a request.
 
-VoiceCart is a full-stack voice-enabled shopping assistant designed to make everyday shopping-list management faster and more intuitive.
+### Install
 
-Instead of manually searching and typing products, users can interact with the application using natural-language commands such as:
+This is a [Node.js](https://nodejs.org/en/) module available through the
+[npm registry](https://www.npmjs.com/). Installation is done using the
+[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
-> 🎤 "Add 2 bottles of water and some bread."
-
-VoiceCart processes the command, identifies the requested actions, products, and quantities, matches them with the available product database, and updates the shopping list.
-
-The project focuses not only on voice input but also on **intelligent interaction, error handling, recommendations, budgeting, and user experience**.
-
----
-
-## ✨ Key Features
-
-### 🎤 1. Natural-Language Voice Commands
-
-Users can manage their shopping list using voice commands.
-
-Examples:
-
-```text
-"Add milk"
-"Add 2 bottles of water"
-"Remove bread"
-"Show my shopping list"
-"Find apples"
+```sh
+$ npm install type-is
 ```
 
-The application extracts the intended action, product, and quantity from the command.
+## API
 
----
+```js
+var http = require('http')
+var typeis = require('type-is')
 
-### 🧠 2. Multi-Item Command Understanding
-
-Instead of processing only one product at a time, the assistant can be designed to understand commands such as:
-
-```text
-"Add milk, bread and 2 apples"
+http.createServer(function (req, res) {
+  var istext = typeis(req, ['text/*'])
+  res.end('you ' + (istext ? 'sent' : 'did not send') + ' me text')
+})
 ```
 
-and convert them into individual shopping-list actions.
+### typeis(request, types)
 
-This makes the interaction closer to how people naturally speak.
+Checks if the `request` is one of the `types`. If the request has no body,
+even if there is a `Content-Type` header, then `null` is returned. If the
+`Content-Type` header is invalid or does not matches any of the `types`, then
+`false` is returned. Otherwise, a string of the type that matched is returned.
 
----
+The `request` argument is expected to be a Node.js HTTP request. The `types`
+argument is an array of type strings.
 
-### 🎯 3. Intelligent Clarification
+Each type in the `types` array can be one of the following:
 
-Voice commands can sometimes be ambiguous.
+- A file extension name such as `json`. This name will be returned if matched.
+- A mime type such as `application/json`.
+- A mime type with a wildcard such as `*/*` or `*/json` or `application/*`.
+  The full mime type will be returned if matched.
+- A suffix such as `+json`. This can be combined with a wildcard such as
+  `*/vnd+json` or `application/*+json`. The full mime type will be returned
+  if matched.
 
-For example:
+Some examples to illustrate the inputs and returned value:
 
-```text
-"Add apple"
+<!-- eslint-disable no-undef -->
+
+```js
+// req.headers.content-type = 'application/json'
+
+typeis(req, ['json']) // => 'json'
+typeis(req, ['html', 'json']) // => 'json'
+typeis(req, ['application/*']) // => 'application/json'
+typeis(req, ['application/json']) // => 'application/json'
+
+typeis(req, ['html']) // => false
 ```
 
-Instead of blindly selecting a product, VoiceCart can ask:
+### typeis.hasBody(request)
 
-```text
-Which apple would you like?
+Returns a Boolean if the given `request` has a body, regardless of the
+`Content-Type` header.
 
-• Red apples
-• Green apples
-• Golden apples
-```
+Having a body has no relation to how large the body is (it may be 0 bytes).
+This is similar to how file existence works. If a body does exist, then this
+indicates that there is data to read from the Node.js request stream.
 
-This helps prevent incorrect shopping-list updates.
+<!-- eslint-disable no-undef -->
 
----
+```js
+if (typeis.hasBody(req)) {
+  // read the body, since there is one
 
-### 🔎 4. Smart Product Matching
-
-The application supports:
-
-* Exact product matching
-* Partial matching
-* Similarity-based matching
-* Product variants
-
-For example, a user can enter an imperfect or partial product name and the system attempts to find the closest available product.
-
----
-
-### ↩️ 5. Undo Last Command
-
-Voice interfaces need an easy way to recover from mistakes.
-
-VoiceCart introduces an **Undo** concept so users can reverse their most recent shopping-list action.
-
-Example:
-
-```text
-User: "Add 3 apples."
-
-Assistant: "Added 3 apples."
-
-User: "Undo that."
-
-Assistant: "Removed the last change."
-```
-
----
-
-### 💰 6. Smart Budget Mode
-
-Users can define a shopping budget.
-
-Example:
-
-```text
-Budget: $50
-
-Current total: $37.46
-Remaining: $12.54
-```
-
-If a new item exceeds the available budget, the assistant can provide a warning instead of silently increasing spending.
-
-This transforms the application from a basic shopping list into a **shopping decision assistant**.
-
----
-
-### 💡 7. Context-Aware Recommendations
-
-VoiceCart provides complementary product suggestions based on the user's current shopping list.
-
-For example:
-
-```text
-Added:
-🍝 Pasta
-
-You may also need:
-🍅 Tomato Sauce
-🫒 Olive Oil
-🧀 Cheese
-```
-
----
-
-### 🌱 8. Seasonal Recommendations
-
-The assistant can provide seasonal product suggestions based on the current season.
-
-Examples include:
-
-* Summer → Watermelon, corn, berries
-* Fall → Apples, pumpkin, squash
-* Winter → Kale, carrots, potatoes
-* Spring → Strawberries, asparagus, peas
-
----
-
-### 🔄 9. Smart Substitutions
-
-When a product has alternatives, VoiceCart can suggest substitutions.
-
-Example:
-
-```text
-Milk
-↓
-Almond Milk
-Oat Milk
-Soy Milk
-Coconut Milk
-```
-
-This can be useful when a preferred product is unavailable or when users want alternatives.
-
----
-
-### 📊 10. Shopping Insights
-
-VoiceCart can provide useful information about shopping behavior.
-
-Example:
-
-```text
-📊 Shopping Insights
-
-Most Added:
-Bananas – 8 times
-
-Top Category:
-Dairy – 32%
-
-Current Spending:
-$42.50
-
-Items:
-12
-
-Estimated Budget Remaining:
-$7.50
-```
-
-This adds an analytics layer to the application.
-
----
-
-### 🎬 11. Interactive Demo Mode
-
-A guided demo can demonstrate the major capabilities of the application without requiring a new user to figure everything out.
-
-Example flow:
-
-```text
-Add products
-      ↓
-Modify quantities
-      ↓
-View shopping list
-      ↓
-Generate recommendations
-      ↓
-Check budget
-      ↓
-View insights
-```
-
-This is particularly useful for evaluating the project quickly.
-
----
-
-## 🧩 Technical Architecture
-
-```text
-                 ┌─────────────────────┐
-                 │       User          │
-                 └──────────┬──────────┘
-                            │
-                            ▼
-                 ┌─────────────────────┐
-                 │ Voice / Text Input  │
-                 └──────────┬──────────┘
-                            │
-                            ▼
-                 ┌─────────────────────┐
-                 │ Web Speech API      │
-                 └──────────┬──────────┘
-                            │
-                            ▼
-                 ┌─────────────────────┐
-                 │ Express.js API      │
-                 └──────────┬──────────┘
-                            │
-                            ▼
-                 ┌─────────────────────┐
-                 │ Voice Command       │
-                 │ Processor            │
-                 └──────────┬──────────┘
-                            │
-                ┌───────────┼───────────┐
-                ▼           ▼           ▼
-          Action        Product      Quantity
-          Detection     Matching     Extraction
-                │           │           │
-                └───────────┼───────────┘
-                            ▼
-                 ┌─────────────────────┐
-                 │ Shopping List       │
-                 └──────────┬──────────┘
-                            │
-            ┌───────────────┼────────────────┐
-            ▼               ▼                ▼
-       Suggestions       Budget           Insights
-```
-
----
-
-## 🛠️ Technology Stack
-
-### Frontend
-
-* HTML5
-* CSS3
-* JavaScript
-* Web Speech API
-
-### Backend
-
-* Node.js
-* Express.js
-* REST APIs
-* CORS
-* Body Parser
-
-### Processing
-
-* JavaScript-based natural-language command processing
-* Keyword-based intent detection
-* Quantity extraction
-* Product matching
-* Similarity-based matching
-
-### Data
-
-Currently uses in-memory data structures for demonstration purposes.
-
-A production implementation could use:
-
-* MongoDB
-* PostgreSQL
-* Firebase
-* Redis for temporary state
-
----
-
-## 🔌 API Endpoints
-
-| Method | Endpoint                     | Purpose                     |
-| ------ | ---------------------------- | --------------------------- |
-| POST   | `/api/process-command`       | Process voice/text commands |
-| GET    | `/api/shopping-list/:userId` | Retrieve shopping list      |
-| POST   | `/api/suggestions`           | Generate recommendations    |
-| GET    | `/api/search/:query`         | Search products             |
-| DELETE | `/api/shopping-list/:userId` | Clear shopping list         |
-| GET    | `/api/health`                | Check backend status        |
-
-### Example Request
-
-```json
-{
-  "command": "add 2 bottles of water",
-  "userId": "user123"
+  req.on('data', function (chunk) {
+    // ...
+  })
 }
 ```
 
-### Example Response
+### typeis.is(mediaType, types)
 
-```json
-{
-  "success": true,
-  "action": "add",
-  "message": "Added 2 water to your shopping list"
-}
+Checks if the `mediaType` is one of the `types`. If the `mediaType` is invalid
+or does not matches any of the `types`, then `false` is returned. Otherwise, a
+string of the type that matched is returned.
+
+The `mediaType` argument is expected to be a
+[media type](https://tools.ietf.org/html/rfc6838) string. The `types` argument
+is an array of type strings.
+
+Each type in the `types` array can be one of the following:
+
+- A file extension name such as `json`. This name will be returned if matched.
+- A mime type such as `application/json`.
+- A mime type with a wildcard such as `*/*` or `*/json` or `application/*`.
+  The full mime type will be returned if matched.
+- A suffix such as `+json`. This can be combined with a wildcard such as
+  `*/vnd+json` or `application/*+json`. The full mime type will be returned
+  if matched.
+
+Some examples to illustrate the inputs and returned value:
+
+<!-- eslint-disable no-undef -->
+
+```js
+var mediaType = 'application/json'
+
+typeis.is(mediaType, ['json']) // => 'json'
+typeis.is(mediaType, ['html', 'json']) // => 'json'
+typeis.is(mediaType, ['application/*']) // => 'application/json'
+typeis.is(mediaType, ['application/json']) // => 'application/json'
+
+typeis.is(mediaType, ['html']) // => false
 ```
 
----
+## Examples
 
-## 🧠 Command Processing
+### Example body parser
 
-The command processor follows a simple pipeline:
+```js
+var express = require('express')
+var typeis = require('type-is')
 
-```text
-User Command
-     ↓
-Normalize Text
-     ↓
-Detect Intent
-     ↓
-Extract Quantity
-     ↓
-Identify Product
-     ↓
-Find Closest Product Match
-     ↓
-Update Shopping List
-     ↓
-Generate Response
+var app = express()
+
+app.use(function bodyParser (req, res, next) {
+  if (!typeis.hasBody(req)) {
+    return next()
+  }
+
+  switch (typeis(req, ['urlencoded', 'json', 'multipart'])) {
+    case 'urlencoded':
+      // parse urlencoded body
+      throw new Error('implement urlencoded body parsing')
+    case 'json':
+      // parse json body
+      throw new Error('implement json body parsing')
+    case 'multipart':
+      // parse multipart body
+      throw new Error('implement multipart body parsing')
+    default:
+      // 415 error code
+      res.statusCode = 415
+      res.end()
+      break
+  }
+})
 ```
 
-Supported intents include:
-
-* Add
-* Remove
-* Search
-* List
-
-The product matching system attempts exact, partial, and similarity-based matching.
-
----
-
-## 🎯 Problem Statement
-
-Traditional shopping-list applications require users to manually type products, search through interfaces, and repeatedly update quantities.
-
-This becomes inconvenient when users are:
-
-* Cooking
-* Cleaning
-* Grocery shopping
-* Multitasking
-* Unable to interact comfortably with a keyboard
-
-VoiceCart addresses this problem through a voice-first interface combined with intelligent shopping-list management.
-
----
-
-## 💡 What Makes VoiceCart Different?
-
-The project goes beyond basic voice-to-text functionality.
-
-### 1. Voice + Intelligence
-
-The system does not simply convert speech into text. It attempts to understand:
-
-```text
-Action + Product + Quantity
-```
-
-### 2. Human-Friendly Error Handling
-
-Ambiguous commands can trigger clarification instead of incorrect actions.
-
-### 3. Decision Support
-
-Budget tracking and recommendations help users decide what to buy.
-
-### 4. Context Awareness
-
-Recommendations depend on the user's current shopping list and season.
-
-### 5. Analytics
-
-Shopping insights turn shopping-list data into useful information.
-
-### 6. Recoverability
-
-Undo functionality allows users to recover from accidental voice commands.
-
----
-
-## 🧪 Example User Journey
-
-```text
-User:
-"Add pasta."
-
-VoiceCart:
-"Added pasta."
-
-VoiceCart:
-"You may also need tomato sauce, olive oil and cheese."
-
-User:
-"Add tomato sauce."
-
-VoiceCart:
-"Added tomato sauce."
-
-User:
-"What's my total?"
-
-VoiceCart:
-"Your current shopping total is $4.98."
-
-User:
-"Undo that."
-
-VoiceCart:
-"Removed tomato sauce."
-```
-
----
-
-## ⚠️ Current Limitations
-
-The current implementation is intentionally lightweight and uses in-memory storage.
-
-Therefore:
-
-* Shopping lists are not persistent after server restart.
-* Product data is currently predefined.
-* Voice recognition depends on browser support.
-* The product database is a demonstration dataset.
-* No authentication system is currently implemented.
-
----
-
-## 🔮 Future Improvements
-
-Potential production-level improvements include:
-
-* Persistent database integration
-* User authentication
-* Real supermarket/product APIs
-* Real-time product pricing
-* Multilingual voice commands
-* LLM-powered intent recognition
-* Advanced fuzzy matching
-* Personalized recommendations
-* Shopping history
-* Mobile/PWA application
-* Cloud deployment
-* Offline voice command support
-* Personalized budget optimization
-
----
-
-## ▶️ Run Locally
-
-### 1. Clone the repository
-
-```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
-```
-
-### 2. Enter the project
-
-```bash
-cd voicecart-intelligent-shopping-assistant
-```
-
-### 3. Install dependencies
-
-```bash
-npm install
-```
-
-### 4. Start the application
-
-```bash
-npm start
-```
-
-### 5. Open in browser
-
-```text
-http://localhost:5000
-```
-
-> Microphone permission may be required for voice functionality.
-
----
-
-## 🔐 Security Note
-
-No private API keys, credentials, `.env` files, or `node_modules` should be committed to the repository.
-
-Use `.gitignore` to prevent sensitive or unnecessary files from being uploaded.
-
----
-
-## 👩‍💻 Project Focus
-
-This project was developed as a practical full-stack application with emphasis on:
-
-* Voice interfaces
-* Natural-language command processing
-* REST API development
-* Product matching
-* User experience
-* Recommendation systems
-* Budget-aware decision support
-* Data-driven shopping insights
-
----
-
-## 📌 Future Vision
-
-VoiceCart can evolve from a shopping-list application into a complete **AI-powered personal grocery assistant** capable of understanding user preferences, budgets, dietary requirements, purchase history, and real-time product availability.
-
----
-
-⭐ **If you find this project interesting, feel free to explore the implementation and API architecture.**
+## License
+
+[MIT](LICENSE)
+
+[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/type-is/master
+[coveralls-url]: https://coveralls.io/r/jshttp/type-is?branch=master
+[node-version-image]: https://badgen.net/npm/node/type-is
+[node-version-url]: https://nodejs.org/en/download
+[npm-downloads-image]: https://badgen.net/npm/dm/type-is
+[npm-url]: https://npmjs.org/package/type-is
+[npm-version-image]: https://badgen.net/npm/v/type-is
+[travis-image]: https://badgen.net/travis/jshttp/type-is/master
+[travis-url]: https://travis-ci.org/jshttp/type-is
